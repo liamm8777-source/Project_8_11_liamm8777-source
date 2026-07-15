@@ -1,14 +1,24 @@
 """
 Program Name: Python Study Planner
 Author: Liam Malone
-Purpose: A command-line study planner that will let users add, view, complete, and delete school tasks.
-Date: June 25 2026
+Purpose: A command-line study planner that lets users add, view, complete,
+delete, save, and load school tasks.
+Resources Used: Original Project One Python Study Planner and
+Date: June 25, 2026
+Updated: July 15, 2026
 """
+
+
+# project two code added
+from planner_manager import StudyPlannerManager
+from study_storage import load_study_tasks, save_study_tasks
+from study_task import PriorityStudyTask, StudyTask
+
+
 def display_study_planner_title():
     """Display the title of the Python Study Planner."""
     print()
     print("Python Study Planner")
-   
 
 
 def display_study_planner_menu():
@@ -22,23 +32,54 @@ def display_study_planner_menu():
     print("6. Quit")
 
 
-def add_study_task(study_tasks):
-    """Add a new study task to the task list."""
-    task_name = input("Enter the task name: ")
-    task_subject = input("Enter the subject: ")
+# project two code added
+def add_study_task(study_planner):
+    """Add a regular or priority task to the planner."""
+    study_task_name = input("Enter the task name: ")
+    study_task_subject = input("Enter the subject: ")
 
-    new_task = {
-        "name": task_name,
-        "subject": task_subject,
-        "complete": False
-    }
+    priority_answer = input(
+        "Is this a priority task? (y/n): "
+    ).lower()
 
-    study_tasks.append(new_task)
+    if priority_answer == "y":
+        priority_level = input(
+            "Enter the priority level "
+            "(Low, Medium, or High): "
+        ).title()
+
+        if priority_level not in ("Low", "Medium", "High"):
+            print(
+                "Invalid priority level. "
+                "Medium will be used."
+            )
+            priority_level = "Medium"
+
+        new_study_task = PriorityStudyTask(
+            study_task_name,
+            study_task_subject,
+            priority_level
+        )
+    else:
+        new_study_task = StudyTask(
+            study_task_name,
+            study_task_subject
+        )
+
+    study_planner.add_study_task(new_study_task)
+
+    save_study_tasks(
+        study_planner.get_all_study_tasks()
+    )
+
     print("Task added successfully.")
 
 
-def view_study_tasks(study_tasks):
-    """Display all study tasks in the task list."""
+# project two code added
+def view_study_tasks(study_planner):
+    """Display all study tasks in the planner."""
+    study_tasks = study_planner.get_all_study_tasks()
+
     if len(study_tasks) == 0:
         print("There are no tasks yet.")
     else:
@@ -47,80 +88,134 @@ def view_study_tasks(study_tasks):
 
         task_number = 1
 
-        for task in study_tasks:
-            if task["complete"]:
-                task_status = "Complete"
-            else:
-                task_status = "Not Complete"
+        for study_task in study_tasks:
+            print(
+                f"{task_number}. "
+                f"{study_task.get_study_task_description()}"
+            )
 
-            print(f"{task_number}. {task['name']} - {task['subject']} - {task_status}")
             task_number += 1
 
 
-def get_task_index_from_user(study_tasks, action_name):
-    """Get a valid task number from the user and return the task index."""
-    if len(study_tasks) == 0:
+# project two code added
+def get_task_index_from_user(
+    study_planner,
+    action_name
+):
+    """Get a valid task number and return its index."""
+    if study_planner.get_study_task_count() == 0:
         print("There are no tasks to choose from.")
         return None
 
-    view_study_tasks(study_tasks)
+    view_study_tasks(study_planner)
 
-    task_choice = input(f"Enter the task number to {action_name}: ")
+    task_choice = input(
+        f"Enter the task number to {action_name}: "
+    )
 
-    if not task_choice.isdigit():
+    try:
+        task_number = int(task_choice)
+    except ValueError:
         print("Please enter a number.")
         return None
 
-    task_number = int(task_choice)
-
-    if task_number < 1 or task_number > len(study_tasks):
+    if (
+        task_number < 1
+        or task_number
+        > study_planner.get_study_task_count()
+    ):
         print("That task number does not exist.")
         return None
 
     return task_number - 1
 
 
-def mark_study_task_complete(study_tasks):
+# project two code added
+def mark_study_task_complete(study_planner):
     """Mark one study task as complete."""
-    task_index = get_task_index_from_user(study_tasks, "mark complete")
+    study_task_index = get_task_index_from_user(
+        study_planner,
+        "mark complete"
+    )
 
-    if task_index is not None:
-        study_tasks[task_index]["complete"] = True
+    if study_task_index is not None:
+        study_planner.complete_study_task(
+            study_task_index
+        )
+
+        save_study_tasks(
+            study_planner.get_all_study_tasks()
+        )
+
         print("Task marked as complete.")
 
 
-def delete_study_task(study_tasks):
-    """Delete one study task from the task list."""
-    task_index = get_task_index_from_user(study_tasks, "delete")
+# project two code added
+def delete_study_task(study_planner):
+    """Delete one study task from the planner."""
+    study_task_index = get_task_index_from_user(
+        study_planner,
+        "delete"
+    )
 
-    if task_index is not None:
-        removed_task = study_tasks.pop(task_index)
-        print(f"Deleted task: {removed_task['name']}")
+    if study_task_index is not None:
+        removed_study_task = (
+            study_planner.delete_study_task(
+                study_task_index
+            )
+        )
+
+        save_study_tasks(
+            study_planner.get_all_study_tasks()
+        )
+
+        print(
+            "Deleted task: "
+            f"{removed_study_task.study_task_name}"
+        )
 
 
-def view_study_progress(study_tasks):
-    """Display how many study tasks are complete."""
-    total_tasks = len(study_tasks)
-    completed_tasks = 0
+# project two code added
+def view_study_progress(study_planner):
+    
+    total_study_tasks = (
+        study_planner.get_study_task_count()
+    )
 
-    for task in study_tasks:
-        if task["complete"]:
-            completed_tasks += 1
+    completed_study_tasks = (
+        study_planner
+        .get_completed_study_task_count()
+    )
 
     print()
     print("Study Progress")
-    print(f"Completed tasks: {completed_tasks}")
-    print(f"Total tasks: {total_tasks}")
+    print(
+        f"Completed tasks: {completed_study_tasks}"
+    )
+    print(f"Total tasks: {total_study_tasks}")
 
-    if total_tasks > 0:
-        print(f"You have completed {completed_tasks} out of {total_tasks} tasks.")
+    if total_study_tasks > 0:
+        print(
+            f"You have completed "
+            f"{completed_study_tasks} out of "
+            f"{total_study_tasks} tasks."
+        )
     else:
-        print("Add a task to start tracking your progress.")
+        print(
+            "Add a task to start tracking "
+            "your progress."
+        )
 
 
+# project two code added
 def run_python_study_planner():
-    """Run the main Python Study Planner program."""
-    study_tasks = []
+    """Load saved tasks and run the study planner."""
+    loaded_study_tasks = load_study_tasks()
+
+    study_planner = StudyPlannerManager(
+        loaded_study_tasks
+    )
+
     menu_choices = ("1", "2", "3", "4", "5", "6")
     program_is_running = True
 
@@ -131,20 +226,41 @@ def run_python_study_planner():
         user_choice = input("Choose an option: ")
 
         if user_choice == "1":
-            add_study_task(study_tasks)
+            add_study_task(study_planner)
+
         elif user_choice == "2":
-            view_study_tasks(study_tasks)
+            view_study_tasks(study_planner)
+
         elif user_choice == "3":
-            mark_study_task_complete(study_tasks)
+            mark_study_task_complete(
+                study_planner
+            )
+
         elif user_choice == "4":
-            delete_study_task(study_tasks)
+            delete_study_task(study_planner)
+
         elif user_choice == "5":
-            view_study_progress(study_tasks)
+            view_study_progress(study_planner)
+
         elif user_choice == "6":
-            print("Thank you for using Python Study Planner.")
+            save_study_tasks(
+                study_planner.get_all_study_tasks()
+            )
+
+            print(
+                "Thank you for using "
+                "Python Study Planner."
+            )
+
             program_is_running = False
+
         elif user_choice not in menu_choices:
-            print("Invalid choice. Please choose a number from 1 to 6.")
+            print(
+                "Invalid choice. "
+                "Please choose a number from 1 to 6."
+            )
 
 
-run_python_study_planner()
+# project two code added
+if __name__ == "__main__":
+    run_python_study_planner()
