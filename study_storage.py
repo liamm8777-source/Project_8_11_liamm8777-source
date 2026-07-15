@@ -49,9 +49,9 @@ def save_study_tasks(
         return False
 
 
-# project two code added
+
 def load_study_tasks(file_path=STUDY_TASK_FILE):
-    """Load all study tasks from a JSON file."""
+    
     file_path = Path(file_path)
 
     if not file_path.exists():

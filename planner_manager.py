@@ -3,7 +3,6 @@ Program Name: Python Study Planner
 Author: Liam Malone
 Purpose: Manage the collection of study tasks in the planner.
 Resources Used: Original Project One Python Study Planner and
-Python Crash Course Chapter 9.
 Date: July 14, 2026
 """
 
