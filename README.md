@@ -1,6 +1,6 @@
-# Video Presentation
+# Video Presentation link https://studentcscc-my.sharepoint.com/:p:/g/personal/lmalone11_student_cscc_edu/IQCKIRvP4zKGQKjWKD5htOURAQOa7T3lrO4resbuBMgvabM?e=r9SXKb
 
-The unlisted YouTube presentation link will be added here before submission.
+The unlisted YouTube presentation link https://youtu.be/uGI_GcQhPIw?si=7Slyrf2YN-a3h1pS
 
 # Python Study Planner
 
